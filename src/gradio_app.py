@@ -17,7 +17,7 @@ from transformers import (
     AutoModelForCausalLM,
     AutoProcessor,
     AutoTokenizer,
-    BitsAndBytesConfig,
+    # BitsAndBytesConfig,
 )
 
 from agent import DeepResearchAgent
@@ -29,19 +29,19 @@ os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
 
 
 def load_model():
-    bnb = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-    )
+    # bnb = BitsAndBytesConfig(
+    #     load_in_4bit=True,
+    #     bnb_4bit_compute_dtype=torch.bfloat16,
+    #     bnb_4bit_use_double_quant=True,
+    #     bnb_4bit_quant_type="nf4",
+    # )
 
     multimodal = USE_MULTIMODAL
     try:
         processor = AutoProcessor.from_pretrained(MODEL_ID)
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
-            quantization_config=bnb,
+            # quantization_config=bnb,
             device_map="auto",
             torch_dtype=torch.bfloat16,
         )
@@ -53,7 +53,7 @@ def load_model():
         processor.pad_token = processor.eos_token
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
-            quantization_config=bnb,
+            # quantization_config=bnb,
             device_map="auto",
             torch_dtype=torch.bfloat16,
         )
