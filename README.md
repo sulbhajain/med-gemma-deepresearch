@@ -71,13 +71,28 @@ med-gemma-deepresearch/
 ```bash
 git clone https://github.com/<your-username>/med-gemma-deepresearch.git
 cd med-gemma-deepresearch
+```
+
+Preferred (`uv`):
+
+```bash
+uv venv --python 3.12 .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+On Apple Silicon Macs, prefer Python 3.12 for best wheel compatibility with `torch`/`bitsandbytes`.
+
+Alternative (`pip`):
+
+```bash
 pip install -r requirements.txt
 ```
 
 ### 2 — Authenticate (MedGemma requires gated HuggingFace access)
 
 ```bash
-huggingface-cli login
+hf auth login
 ```
 
 ### 3 — Run the full pipeline
