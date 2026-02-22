@@ -95,7 +95,14 @@ def load_medmnist_fallback(n: int = MAX_IMAGES) -> pd.DataFrame:
         label = int(label_arr[0])
         plane = "Fetal brain" if label == 1 else "Other"
         out   = img_dir / f"breast_{i:05d}.png"
-        Image.fromarray(img_arr.squeeze()).convert("RGB").save(out)
+        if isinstance(img_arr, Image.Image):
+            img = img_arr.convert("RGB")
+        else:
+            arr = np.asarray(img_arr)
+            if arr.ndim == 3 and arr.shape[-1] == 1:
+                arr = arr.squeeze(-1)
+            img = Image.fromarray(arr).convert("RGB")
+        img.save(out)
         records.append({
             "image_path": str(out),
             "Plane":      plane,

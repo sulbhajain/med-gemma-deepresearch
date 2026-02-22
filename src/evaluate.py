@@ -31,7 +31,9 @@ def run_batch_evaluation(
     Run agent.assess() on every record and return a results DataFrame.
 
     Columns: case_id, plane, predicted_risk, risk_score, confidence,
-             reasoning, equity_notes, image_path, actual_risk, correct,
+             reasoning, equity_notes, differential_diagnoses,
+             uncertainty_summary, safety_flags, review_required,
+             cannot_assess, image_path, actual_risk, correct,
              + all demographics keys.
     """
     if max_cases:
@@ -56,6 +58,11 @@ def run_batch_evaluation(
                 "confidence":     result.confidence_score,
                 "reasoning":      result.reasoning,
                 "equity_notes":   result.equity_notes,
+                "differential_diagnoses": getattr(result, "differential_diagnoses", ""),
+                "uncertainty_summary":    getattr(result, "uncertainty_summary", ""),
+                "safety_flags":           getattr(result, "safety_flags", ""),
+                "review_required":        getattr(result, "review_required", False),
+                "cannot_assess":          getattr(result, "cannot_assess", False),
                 "image_path":     case["image_path"],
                 **case["demographics"],
             })
@@ -69,6 +76,11 @@ def run_batch_evaluation(
                 "confidence":     0.3,
                 "reasoning":      "Error during inference",
                 "equity_notes":   "N/A",
+                "differential_diagnoses": "",
+                "uncertainty_summary":    "Model confidence: low; Image quality confidence: low; Data completeness confidence: low",
+                "safety_flags":           "Inference error",
+                "review_required":        True,
+                "cannot_assess":          True,
                 "image_path":     case["image_path"],
                 **case["demographics"],
             })
@@ -139,12 +151,17 @@ def save_submission(df: pd.DataFrame, path: str = "results/submission.csv"):
     sub = df[[
         "case_id", "predicted_risk", "risk_score",
         "confidence", "plane", "reasoning", "equity_notes",
+        "differential_diagnoses", "uncertainty_summary", "safety_flags",
+        "review_required", "cannot_assess",
     ]].rename(columns={"predicted_risk": "risk_level", "equity_notes": "equity_note"})
     sub["image_used"] = True
     sub["risk_score"]  = sub["risk_score"].round(3)
     sub["confidence"]  = sub["confidence"].round(3)
     sub["reasoning"]   = sub["reasoning"].str[:200]
     sub["equity_note"] = sub["equity_note"].str[:150]
+    sub["differential_diagnoses"] = sub["differential_diagnoses"].astype(str).str[:300]
+    sub["uncertainty_summary"]    = sub["uncertainty_summary"].astype(str).str[:160]
+    sub["safety_flags"]           = sub["safety_flags"].astype(str).str[:160]
     sub.to_csv(path, index=False)
     print(f"✅ Submission saved → {path}  ({len(sub)} rows)")
     return sub

@@ -95,14 +95,16 @@ pip install -r requirements.txt
 hf auth login
 ```
 
-### 3 — Run the full pipeline
+### 3 — Run interactive app inference (Gradio)
 
 ```bash
-python src/main.py
-# Outputs: results/submission.csv + 4 PNG dashboards
+source .venv/bin/activate
+python src/gradio_app.py
 ```
 
-### 4 — Run a single case interactively
+Then open the local URL printed in the terminal (usually `http://127.0.0.1:7860`).
+
+### 4 — Run a single case from Python (optional)
 
 ```python
 from src.agent import DeepResearchAgent
@@ -120,13 +122,60 @@ result = agent.assess(
 print(result.risk_level, result.reasoning)
 ```
 
-### 5 — Launch Gradio app
+### 5 — Run batch inference (full pipeline)
 
 ```bash
-python src/gradio_app.py
+source .venv/bin/activate
+python src/main.py
 ```
 
-Then open the local URL printed in the terminal (usually `http://127.0.0.1:7860`).
+Main outputs:
+- `results/submission.csv`
+- Evaluation dashboards (PNG files in `results/`)
+
+### 6 — Run a quick batch smoke test (3 real inference cases)
+
+```bash
+source .venv/bin/activate
+PYTHONPATH=src python scripts/smoke_real_inference.py
+```
+
+Smoke test output:
+- `results/real_smoke_eval.csv`
+
+### 7 — Troubleshooting
+
+**`hf: command not found`**
+
+```bash
+source .venv/bin/activate
+hf --help
+```
+
+If `hf` still is not found, reinstall deps:
+
+```bash
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+**Model access error (`google/medgemma-4b-it`)**
+
+```bash
+source .venv/bin/activate
+hf auth login
+hf auth whoami
+```
+
+Ensure your Hugging Face account has accepted the model access terms.
+
+**Port already in use (`127.0.0.1:7860`)**
+
+```bash
+lsof -tiTCP:7860 -sTCP:LISTEN | xargs -r kill
+source .venv/bin/activate
+python src/gradio_app.py
+```
 
 ---
 
